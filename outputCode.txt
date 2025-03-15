@@ -1,0 +1,31 @@
+from flask import Flask, render_template, request, redirect, url_for
+
+app = Flask(__name__)
+
+# Sample data for orders and stock
+orders = []
+stock = {'item1': 100, 'item2': 50, 'item3': 200}
+
+@app.route('/')
+def index():
+    return render_template('index.html', orders=orders, stock=stock)
+
+@app.route('/add_order', methods=['POST'])
+def add_order():
+    item = request.form.get('item')
+    quantity = int(request.form.get('quantity'))
+    if item in stock and stock[item] >= quantity:
+        orders.append({'item': item, 'quantity': quantity})
+        stock[item] -= quantity
+    return redirect(url_for('index'))
+
+@app.route('/restock', methods=['POST'])
+def restock():
+    item = request.form.get('item')
+    quantity = int(request.form.get('quantity'))
+    if item in stock:
+        stock[item] += quantity
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
